@@ -1,0 +1,16 @@
+package com.bresai.expecto.patronum.core.parser;
+
+import com.bresai.expecto.patronum.core.bean.ConfigBean;
+
+import java.io.File;
+import java.util.List;
+
+/**
+ * @version 1.0
+ * @author:bresai
+ * @date:2019/11/27
+ * @content:
+ */
+public interface Parser {
+    List<ConfigBean> parser(File file);
+}

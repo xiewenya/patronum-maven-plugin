@@ -50,6 +50,12 @@
             <version>4.0.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>javaparser-symbol-solver-core</artifactId>
+            <version>3.15.5</version>
+        </dependency>
+
         <!-- JGit -->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>

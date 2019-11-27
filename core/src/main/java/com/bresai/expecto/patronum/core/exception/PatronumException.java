@@ -1,4 +1,4 @@
-package com.bresai.expecto.patronum.core;
+package com.bresai.expecto.patronum.core.exception;
 
 /**
  * @version 1.0

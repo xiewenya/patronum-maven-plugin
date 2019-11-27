@@ -15,7 +15,7 @@ import java.io.File;
  * @content:
  */
 @Slf4j
-public class testNativeGitOperations  extends AheadBehindTest<NativeGitProvider> {
+public class testNativeGitOperations extends AheadBehindTest<NativeGitProvider> {
 
     private NativeGitOperations nativeGitOperations;
 
