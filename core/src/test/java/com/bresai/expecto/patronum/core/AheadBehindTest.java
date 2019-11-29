@@ -29,10 +29,7 @@ import org.junit.rules.TemporaryFolder;
 import pl.project13.core.AheadBehind;
 import pl.project13.core.GitProvider;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 
 import static org.junit.Assert.assertThat;
 
@@ -90,6 +87,17 @@ public abstract class AheadBehindTest<T extends GitProvider> {
     }
 
   }
+
+    protected void writeFile(InputStream is, File file){
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(file));
+            writer.write(is.read());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 
   protected abstract T gitProvider();
 

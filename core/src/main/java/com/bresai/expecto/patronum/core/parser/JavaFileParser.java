@@ -1,6 +1,7 @@
 package com.bresai.expecto.patronum.core.parser;
 
 import com.bresai.expecto.patronum.core.bean.ConfigBean;
+import com.bresai.expecto.patronum.core.bean.JavaFileBean;
 import com.bresai.expecto.patronum.core.bean.NacosValueBean;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -8,9 +9,6 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
-import com.github.javaparser.symbolsolver.JavaSymbolSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import pl.project13.core.log.LoggerBridge;
 
 import java.io.File;
@@ -24,7 +22,7 @@ import java.util.List;
  * @date:2019/11/27
  * @content:
  */
-public class JavaFileParser implements Parser {
+public class JavaFileParser extends JavaParser {
 
     private LoggerBridge log;
 
@@ -37,42 +35,54 @@ public class JavaFileParser implements Parser {
 
     @Override
     public List<ConfigBean> parser(File file){
-        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
-        combinedTypeSolver.add(new ReflectionTypeSolver());
-
-        JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
-        StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
-
-        List<ConfigBean> beans = new LinkedList<>();
-
         try {
+
+            log.info(file.getAbsolutePath());
+
             NodeList<BodyDeclaration<?>> nodeList = new NodeList<>();
 
             CompilationUnit cu = StaticJavaParser.parse(file);
+
+            JavaFileBean fileBean = new JavaFileBean();
+            fileBean.setPackageName(cu);
+            fileBean.setClassName(cu);
+
             if (cu.getPrimaryType().isPresent()){
                 nodeList = cu.getPrimaryType().get().getMembers();
             }
 
-            List<AnnotationExpr> annotations = new LinkedList<>();
+            List<AnnotationExpr> annotations = findAnnotations(nodeList, "NacosValue");
 
-            //get all nacosValue annotations
-            nodeList.forEach(node ->
-                    node.getAnnotationByName("NacosValue")
-                            .ifPresent(annotationExpr -> annotations
-                                    .add(annotationExpr.asAnnotationExpr())));
-
-            //build NacosValueBean for each nacosValue annotation
-            annotations.forEach(annotation -> {
-                beans.add(parseNacosValueProperties(annotation));
-            });
+            return buildAnnotationBeans(annotations, fileBean);
         } catch (FileNotFoundException e) {
             log.error(e.getMessage());
+            return new LinkedList<>();
         }
+    }
+
+    private List<ConfigBean> buildAnnotationBeans(List<AnnotationExpr> annotations, JavaFileBean fileBean) {
+        List<ConfigBean> beans = new LinkedList<>();
+        //build NacosValueBean for each nacosValue annotation
+        annotations.forEach(annotation -> {
+            beans.add(parseNacosValueProperties(annotation, fileBean));
+        });
 
         return beans;
     }
 
-    private NacosValueBean parseNacosValueProperties(AnnotationExpr annotation) {
+    private List<AnnotationExpr> findAnnotations(NodeList<BodyDeclaration<?>> nodeList, String annotationName) {
+        List<AnnotationExpr> annotations = new LinkedList<>();
+
+        //get all nacosValue annotations
+        nodeList.forEach(node ->
+                node.getAnnotationByName(annotationName)
+                        .ifPresent(annotationExpr -> annotations
+                                .add(annotationExpr.asAnnotationExpr())));
+
+        return annotations;
+    }
+
+    private NacosValueBean parseNacosValueProperties(AnnotationExpr annotation, JavaFileBean fileBean) {
         NacosValueBean bean = new NacosValueBean();
 
         if (annotation.isNormalAnnotationExpr()){
@@ -86,13 +96,14 @@ public class JavaFileParser implements Parser {
                     bean.setAutoRefreshed("true".equalsIgnoreCase(memberValuePair.getValue().toString()));
                 }
             });
-
         }
 
         if (annotation.isSingleMemberAnnotationExpr()){
             String expr = annotation.asSingleMemberAnnotationExpr().getMemberValue().asStringLiteralExpr().asString();
             getValues(bean, expr);
         }
+
+        bean.setFileMeta(fileBean);
 
         return bean;
     }

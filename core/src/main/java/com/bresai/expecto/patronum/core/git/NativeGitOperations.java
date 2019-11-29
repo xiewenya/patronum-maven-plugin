@@ -31,14 +31,14 @@ public class NativeGitOperations{
         }
     }
 
-    public String diffBranch(String targetBranchName, String currentBranchName) {
+    public String diffBranch(String currentBranchName, String remoteBranchName) {
 
         if (StringUtils.isEmpty(currentBranchName)){
             currentBranchName = "";
         }
 
         try {
-            return nativeGitRunner.runGitCommand(nativeGitRunner.dotGitDirectory, nativeGitRunner.getNativeGitTimeoutInMs(), "diff " + targetBranchName + "..." + currentBranchName);
+            return nativeGitRunner.runGitCommand(nativeGitRunner.dotGitDirectory, nativeGitRunner.getNativeGitTimeoutInMs(), "diff " + currentBranchName + " " + remoteBranchName);
         } catch (NativeGitRunner.NativeCommandException e) {
             log.info(e.getStdout());
             log.error(e.getStderr());

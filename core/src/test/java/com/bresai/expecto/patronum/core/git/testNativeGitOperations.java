@@ -7,6 +7,7 @@ import pl.project13.core.NativeGitProvider;
 import pl.project13.core.log.StdOutLoggerBridge;
 
 import java.io.File;
+import java.io.InputStream;
 
 /**
  * @version 1.0
@@ -66,19 +67,24 @@ public class testNativeGitOperations extends AheadBehindTest<NativeGitProvider> 
     @Test
     public void testDiffBranchOneFileDiff() throws Exception {
         createLocalCommit();
+
+        //create dev branch
         localRepositoryGit.branchCreate().setName("dev").call();
         log.info(localRepositoryGit.branchList().call().toString());
         log.info(gitProvider.getBranchName());
         log.info(gitProvider.getCommitId());
 
+        //switch to dev branch
         log.info(nativeGitOperations.switchBranch("dev"));
         log.info(gitProvider.getBranchName());
         log.info(gitProvider.getCommitId());
 
-        File newFile = localRepository.newFile();
-        writeFile("hello word", newFile);
+        File newFile = localRepository.newFile("NacosValueTest.java");
+
+        InputStream is = this.getClass().getClassLoader().getResourceAsStream("NacosValueTest.java");
+        writeFile(is, newFile);
         localRepositoryGit.add().addFilepattern(newFile.getName()).call();
-        localRepositoryGit.commit().setMessage("hello world").call();
-        log.info(nativeGitOperations.diffBranch("master", "dev"));
+        localRepositoryGit.commit().setMessage("NacosValueTest").call();
+        log.info(nativeGitOperations.diffBranch("dev", "origin/master"));
     }
 }

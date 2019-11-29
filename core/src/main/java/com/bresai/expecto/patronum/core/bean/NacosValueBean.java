@@ -21,4 +21,6 @@ public class NacosValueBean implements ConfigBean{
 
     private boolean isAutoRefreshed;
 
+    private JavaFileBean fileMeta;
+
 }

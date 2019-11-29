@@ -12,9 +12,7 @@ public class testJavaWalker {
 
     @Test
     public void testClassPath(){
-        JavaWalker javaWalker = new JavaWalker();
 
-        javaWalker.walkThroughPath("classpath:/");
     }
 
 }

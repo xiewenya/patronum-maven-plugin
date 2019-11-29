@@ -1,5 +1,7 @@
 package com.bresai.expecto.patronum.core.file;
 
+import pl.project13.core.log.LoggerBridge;
+
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +15,12 @@ import java.util.function.Predicate;
  * @content:
  */
 public class FileWalker implements DataWalker {
+
+    protected LoggerBridge log;
+
+    public FileWalker(LoggerBridge log) {
+        this.log = log;
+    }
 
     @Override
     public List<File> search(File dir, Predicate<File> predicate){
@@ -62,7 +70,7 @@ public class FileWalker implements DataWalker {
         }
 
         for (File file : subFiles){
-            if (file.isFile() && !function.test(file)){
+            if (file.isFile() && function.test(file)){
                 files.add(file);
             } else if (file.isDirectory()){
                 searchDirRecursive(file, files ,function);
