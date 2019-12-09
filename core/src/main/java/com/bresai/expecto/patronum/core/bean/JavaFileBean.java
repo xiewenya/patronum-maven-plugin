@@ -3,6 +3,8 @@ package com.bresai.expecto.patronum.core.bean;
 import com.github.javaparser.ast.CompilationUnit;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * @version 1.0
@@ -12,7 +14,7 @@ import lombok.Setter;
  */
 @Setter
 @Getter
-public class JavaFileBean {
+public class JavaFileBean implements FileBean {
 
     private String packageName;
 
@@ -28,6 +30,32 @@ public class JavaFileBean {
         if (cu.getPrimaryTypeName().isPresent()){
             this.className = cu.getPrimaryTypeName().get();
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        JavaFileBean that = (JavaFileBean) o;
+
+        return new EqualsBuilder()
+                .append(packageName, that.packageName)
+                .append(className, that.className)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(packageName)
+                .append(className)
+                .toHashCode();
     }
 
     @Override

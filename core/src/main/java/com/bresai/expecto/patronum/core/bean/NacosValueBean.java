@@ -1,10 +1,8 @@
 package com.bresai.expecto.patronum.core.bean;
 
-import com.github.javaparser.ast.comments.Comment;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,7 +13,7 @@ import java.util.Map;
  */
 @Setter
 @Getter
-public class NacosValueBean implements ConfigBean{
+public class NacosValueBean extends ConfigBean{
 
     private String configName;
 
@@ -24,10 +22,6 @@ public class NacosValueBean implements ConfigBean{
     private Map<String, String> envValueMap;
 
     private boolean isAutoRefreshed;
-
-    private JavaFileBean fileMeta;
-
-    private List<Comment> comments;
 
     @Override
     public String toString() {

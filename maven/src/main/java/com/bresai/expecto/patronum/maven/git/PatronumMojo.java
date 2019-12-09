@@ -19,6 +19,7 @@ package com.bresai.expecto.patronum.maven.git;
 
 import com.bresai.expecto.patronum.core.bean.ConfigBean;
 import com.bresai.expecto.patronum.core.file.JavaWalker;
+import com.bresai.expecto.patronum.core.result.Result;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -129,7 +130,7 @@ public class PatronumMojo extends AbstractMojo {
     @Nonnull
     private final LoggerBridge log = new MavenLoggerBridge(this, false);
 
-    List<ConfigBean> ret;
+    Result<ConfigBean> ret;
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -159,12 +160,14 @@ public class PatronumMojo extends AbstractMojo {
 
 //      ResultBean<ConfigBean> result = new ResultBean<>(ret);
 
-            log.info("result size {}, result list {}", ret.size(), ret.toString());
+            log.info("result size {}, result list {}", ret.getSize(), ret.getSimpleList());
 
 //            if (generateGitPropertiesFile){
+
+
             Path path = Files.createFile(Paths.get(projectDirectory.getAbsolutePath(), "config.conf"));
             OutputStream is = Files.newOutputStream(path);
-            ret.forEach(configBean -> {
+            ret.getCompleteList().forEach(configBean -> {
                 try {
                     is.write(configBean.toString().getBytes());
                     is.write("\n\n".getBytes());
