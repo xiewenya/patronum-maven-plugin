@@ -105,13 +105,11 @@ public abstract class GitIntegrationTest {
 
   public static void initializeMojoWithDefaults(PatronumMojo mojo) {
     mojo.verbose = false;
-    mojo.useNativeGit = false;
     mojo.evaluateOnCommit = evaluateOnCommit;
     mojo.nativeGitTimeoutInMs = (30 * 1000);
     mojo.session = mockSession();
     mojo.settings = mockSettings();
   }
-
 
 
   private static MavenSession mockSession() {

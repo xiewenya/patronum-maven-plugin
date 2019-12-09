@@ -1,6 +1,5 @@
 package com.bresai.expecto.patronum.core.git;
 
-import com.sun.istack.internal.NotNull;
 import pl.project13.core.GitCommitIdExecutionException;
 import pl.project13.core.log.LoggerBridge;
 
@@ -34,7 +33,7 @@ public class NativeGitRunner implements GitRunner {
 
     private static NativeGitRunner nativeGitRunner;
 
-    public static synchronized NativeGitRunner of(@Nonnull File dotGitDirectory, long nativeGitTimeoutInMs, @NotNull LoggerBridge loggerBridge){
+    public static synchronized NativeGitRunner of(@Nonnull File dotGitDirectory, long nativeGitTimeoutInMs, @Nonnull LoggerBridge loggerBridge){
         if (nativeGitRunner == null){
             nativeGitRunner = new NativeGitRunner(dotGitDirectory, nativeGitTimeoutInMs, loggerBridge);
         }
@@ -42,7 +41,7 @@ public class NativeGitRunner implements GitRunner {
         return nativeGitRunner;
     }
 
-    private NativeGitRunner(@Nonnull File dotGitDirectory, long nativeGitTimeoutInMs, @NotNull LoggerBridge loggerBridge) {
+    private NativeGitRunner(@Nonnull File dotGitDirectory, long nativeGitTimeoutInMs, @Nonnull LoggerBridge loggerBridge) {
         this.log = loggerBridge;
         this.dotGitDirectory = dotGitDirectory;
         this.nativeGitTimeoutInMs = nativeGitTimeoutInMs;

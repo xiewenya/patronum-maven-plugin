@@ -9,6 +9,7 @@
     <packaging>pom</packaging>
     <version>0.0.1-SNAPSHOT</version>
     <name>Project config watcher</name>
+
     <modules>
         <module>core</module>
         <module>maven</module>

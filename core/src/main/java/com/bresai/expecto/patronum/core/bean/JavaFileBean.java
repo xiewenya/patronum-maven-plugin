@@ -1,7 +1,8 @@
 package com.bresai.expecto.patronum.core.bean;
 
 import com.github.javaparser.ast.CompilationUnit;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @version 1.0
@@ -9,7 +10,8 @@ import lombok.Data;
  * @date:2019/11/28
  * @content:
  */
-@Data
+@Setter
+@Getter
 public class JavaFileBean {
 
     private String packageName;
@@ -26,5 +28,10 @@ public class JavaFileBean {
         if (cu.getPrimaryTypeName().isPresent()){
             this.className = cu.getPrimaryTypeName().get();
         }
+    }
+
+    @Override
+    public String toString() {
+        return packageName + "." + className;
     }
 }

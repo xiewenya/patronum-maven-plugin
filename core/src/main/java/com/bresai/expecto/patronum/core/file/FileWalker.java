@@ -26,6 +26,7 @@ public class FileWalker implements DataWalker {
     public List<File> search(File dir, Predicate<File> predicate){
         List<File> files = new LinkedList<>();
 
+        log.debug("search dir {}", dir.getAbsolutePath());
         searchDirRecursive(dir, files, predicate);
 
         return files;
@@ -71,6 +72,7 @@ public class FileWalker implements DataWalker {
 
         for (File file : subFiles){
             if (file.isFile() && function.test(file)){
+                log.info("file {} found", file.getAbsolutePath());
                 files.add(file);
             } else if (file.isDirectory()){
                 searchDirRecursive(file, files ,function);

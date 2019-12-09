@@ -1,8 +1,9 @@
 package com.bresai.expecto.patronum.core.git;
 
-import com.sun.istack.internal.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import pl.project13.core.log.LoggerBridge;
+
+import javax.annotation.Nonnull;
 
 /**
  * @version 1.0
@@ -16,7 +17,7 @@ public class NativeGitOperations{
 
     private NativeGitRunner nativeGitRunner;
 
-    public NativeGitOperations(@NotNull NativeGitRunner nativeGitRunner) {
+    public NativeGitOperations(@Nonnull NativeGitRunner nativeGitRunner) {
         this.nativeGitRunner = nativeGitRunner;
         this.log = nativeGitRunner.getLog();
     }

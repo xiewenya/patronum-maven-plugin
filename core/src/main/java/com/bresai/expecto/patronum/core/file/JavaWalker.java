@@ -3,9 +3,9 @@ package com.bresai.expecto.patronum.core.file;
 import com.bresai.expecto.patronum.core.bean.ConfigBean;
 import com.bresai.expecto.patronum.core.parser.JavaFileParser;
 import com.bresai.expecto.patronum.core.parser.NacosValueResolver;
-import com.sun.istack.internal.NotNull;
 import pl.project13.core.log.LoggerBridge;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,9 +26,11 @@ public class JavaWalker extends FileWalker {
         javaFileParser = new JavaFileParser(log, new NacosValueResolver());
     }
 
-    public List<ConfigBean> walkThroughPath(@NotNull File gitDir){
+    public List<ConfigBean> walkThroughPath(@Nonnull File gitDir){
 
         Predicate<File> predicate = this.searchJavaFiles();
+
+//        log.info("search dir {}", gitDir.getAbsolutePath());
 
         List<File> fileList = search(gitDir, predicate);
 

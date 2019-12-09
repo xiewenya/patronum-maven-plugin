@@ -18,7 +18,6 @@
 package com.bresai.expecto.patronum.core.git;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.sun.istack.internal.NotNull;
 import pl.project13.core.AheadBehind;
 import pl.project13.core.GitCommitIdExecutionException;
 import pl.project13.core.GitDataProvider;
@@ -42,11 +41,11 @@ public class NativeGitProvider extends GitDataProvider {
   final File canonical;
 
   @Nonnull
-  public static NativeGitProvider on(@NotNull NativeGitRunner gitRunner) {
+  public static NativeGitProvider on(@Nonnull NativeGitRunner gitRunner) {
     return new NativeGitProvider(gitRunner);
   }
 
-  NativeGitProvider(@NotNull NativeGitRunner gitRunner) {
+  NativeGitProvider(@Nonnull NativeGitRunner gitRunner) {
     super(gitRunner.getLog());
     this.dotGitDirectory = gitRunner.getDotGitDirectory();
     this.nativeGitTimeoutInMs = gitRunner.getNativeGitTimeoutInMs();

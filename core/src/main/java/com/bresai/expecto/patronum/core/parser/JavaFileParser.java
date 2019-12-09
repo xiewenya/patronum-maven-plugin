@@ -7,6 +7,7 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import pl.project13.core.log.LoggerBridge;
@@ -105,7 +106,18 @@ public class JavaFileParser extends JavaParser {
 
         bean.setFileMeta(fileBean);
 
+        parseComments(annotation, bean);
+
         return bean;
+    }
+
+    private void parseComments(AnnotationExpr annotation, NacosValueBean bean) {
+        annotation.getParentNode().ifPresent(node -> {
+            List<Comment> comments = new LinkedList<>();
+            node.getComment().ifPresent(comments::add);
+            comments.addAll(node.getAllContainedComments());
+            bean.setComments(comments);
+        });
     }
 
     private void getValues(NacosValueBean bean, String expr) {

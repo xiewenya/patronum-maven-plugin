@@ -17,15 +17,25 @@ import static com.acard.backend.constant.ConsumeOrderStatus.*;
 public class NacosValueTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(NacosValueTest.class);
 
-    @NacosValue("${account.date}")
-    private String billDate;
+    //test1
+    @NacosValue("${account.date}")//subtest1
+    //test2
+    private String billDate;//test3
 
+    /**
+     * test4
+     */
     @NacosValue("${account.date:1000}")
     private String test;
 
     @NacosValue(value = "${settling.duration.days}")
+    /**
+     * test5
+     */
     private Integer settlingDuration;
 
+    //test6
+    //test7
     @NacosValue(value = "${repay.month.bill.trailEntId:10000}", autoRefreshed = true)
     private long trailEntId;
 
