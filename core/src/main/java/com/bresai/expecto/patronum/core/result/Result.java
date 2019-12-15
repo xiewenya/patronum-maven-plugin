@@ -30,7 +30,7 @@ public class Result<T extends ConfigBean> {
         this.completeList = completeList;
         setSimpleList(completeList);
         setSize(completeList.size());
-        getFileSet(completeList);
+        setFileSet(completeList);
     }
 
     public void setSimpleList(List<T> completeList) {
@@ -38,7 +38,7 @@ public class Result<T extends ConfigBean> {
         completeList.forEach(bean -> simpleList.add(bean.toString()));
     }
 
-    private void getFileSet(List<T> completeList) {
+    private void setFileSet(List<T> completeList) {
         if (fileBeanSet == null){
             fileBeanSet = new HashSet<>();
         }

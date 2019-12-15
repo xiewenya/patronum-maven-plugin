@@ -35,30 +35,40 @@ public class JavaFileParser extends JavaParser {
     }
 
     @Override
-    public List<ConfigBean> parser(File file){
+    public List<ConfigBean> parser(String code) {
+        return parse(StaticJavaParser.parse(code), null);
+    }
+
+    @Override
+    public List<ConfigBean> parser(File file) {
         try {
-
             log.info(file.getAbsolutePath());
-
-            NodeList<BodyDeclaration<?>> nodeList = new NodeList<>();
-
-            CompilationUnit cu = StaticJavaParser.parse(file);
-
-            JavaFileBean fileBean = new JavaFileBean();
-            fileBean.setPackageName(cu);
-            fileBean.setClassName(cu);
-
-            if (cu.getPrimaryType().isPresent()){
-                nodeList = cu.getPrimaryType().get().getMembers();
-            }
-
-            List<AnnotationExpr> annotations = findAnnotations(nodeList, "NacosValue");
-
-            return buildAnnotationBeans(annotations, fileBean);
+            return parse(StaticJavaParser.parse(file), file);
         } catch (FileNotFoundException e) {
             log.error(e.getMessage());
             return new LinkedList<>();
         }
+    }
+
+    private List<ConfigBean> parse(CompilationUnit cu, File file) {
+        NodeList<BodyDeclaration<?>> nodeList = new NodeList<>();
+
+        JavaFileBean fileBean = new JavaFileBean();
+        fileBean.setPackageName(cu);
+        fileBean.setClassName(cu);
+        fileBean.setFile(file);
+
+        if (cu.getPrimaryType().isPresent()) {
+            nodeList = cu.getPrimaryType().get().getMembers();
+        }
+
+        List<AnnotationExpr> annotations = findAnnotations(nodeList, "NacosValue");
+
+        List<ConfigBean> configBeans = buildAnnotationBeans(annotations, fileBean);
+
+        fileBean.setConfigBeanList(configBeans);
+
+        return configBeans;
     }
 
     private List<ConfigBean> buildAnnotationBeans(List<AnnotationExpr> annotations, JavaFileBean fileBean) {
@@ -86,20 +96,20 @@ public class JavaFileParser extends JavaParser {
     private NacosValueBean parseNacosValueProperties(AnnotationExpr annotation, JavaFileBean fileBean) {
         NacosValueBean bean = new NacosValueBean();
 
-        if (annotation.isNormalAnnotationExpr()){
+        if (annotation.isNormalAnnotationExpr()) {
             NodeList<MemberValuePair> valuePairs = annotation.asNormalAnnotationExpr().getPairs();
             valuePairs.forEach(memberValuePair -> {
-                if ("value".equalsIgnoreCase(memberValuePair.getName().asString())){
+                if ("value".equalsIgnoreCase(memberValuePair.getName().asString())) {
                     getValues(bean, memberValuePair.getValue().asStringLiteralExpr().asString());
                 }
 
-                if ("autoRefreshed".equalsIgnoreCase(memberValuePair.getName().asString())){
+                if ("autoRefreshed".equalsIgnoreCase(memberValuePair.getName().asString())) {
                     bean.setAutoRefreshed("true".equalsIgnoreCase(memberValuePair.getValue().toString()));
                 }
             });
         }
 
-        if (annotation.isSingleMemberAnnotationExpr()){
+        if (annotation.isSingleMemberAnnotationExpr()) {
             String expr = annotation.asSingleMemberAnnotationExpr().getMemberValue().asStringLiteralExpr().asString();
             getValues(bean, expr);
         }
@@ -123,12 +133,12 @@ public class JavaFileParser extends JavaParser {
     private void getValues(NacosValueBean bean, String expr) {
         String[] rs = valueResolver.resolve(expr);
 
-        if (rs.length == 1 ){
+        if (rs.length == 1) {
             bean.setConfigName(rs[0]);
             bean.setDefaultValue("");
         }
 
-        if (rs.length == 2){
+        if (rs.length == 2) {
             bean.setConfigName(rs[0]);
             bean.setDefaultValue(rs[1]);
         }

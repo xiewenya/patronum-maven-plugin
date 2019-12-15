@@ -14,7 +14,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  */
 @Setter
 @Getter
-public class JavaFileBean implements FileBean {
+public class JavaFileBean extends FileBean {
 
     private String packageName;
 

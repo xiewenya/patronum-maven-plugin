@@ -18,6 +18,7 @@
 package com.bresai.expecto.patronum.maven.git;
 
 import com.bresai.expecto.patronum.core.bean.ConfigBean;
+import com.bresai.expecto.patronum.core.bean.FileBean;
 import com.bresai.expecto.patronum.core.file.JavaWalker;
 import com.bresai.expecto.patronum.core.result.Result;
 import org.apache.maven.execution.MavenSession;
@@ -37,11 +38,11 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -138,9 +139,6 @@ public class PatronumMojo extends AbstractMojo {
             // Set the verbose setting: now it should be correctly loaded from maven.
             log.setVerbose(verbose);
 
-            // read source encoding from project properties for those who still doesn't use UTF-8
-            String sourceEncoding = StandardCharsets.UTF_8.name();
-
             dotGitDirectory = lookupGitDirectory();
 
             if (dotGitDirectory != null) {
@@ -155,16 +153,21 @@ public class PatronumMojo extends AbstractMojo {
                 return;
             }
 
-            JavaWalker javaWalker = new JavaWalker(log);
-            ret = javaWalker.walkThroughPath(projectDirectory);
 
-//      ResultBean<ConfigBean> result = new ResultBean<>(ret);
+
+            JavaWalker javaWalker = new JavaWalker(log, dotGitDirectory);
+            ret = javaWalker.walkThroughLocal(projectDirectory);
+
+            Set<FileBean> set = ret.getFileBeanSet();
+
+            set.forEach(fileBean -> {
+                List<ConfigBean> beans = javaWalker.getJavaFileParser().parser(fileBean.getFile());
+
+            });
 
             log.info("result size {}, result list {}", ret.getSize(), ret.getSimpleList());
 
 //            if (generateGitPropertiesFile){
-
-
             Path path = Files.createFile(Paths.get(projectDirectory.getAbsolutePath(), "config.conf"));
             OutputStream is = Files.newOutputStream(path);
             ret.getCompleteList().forEach(configBean -> {

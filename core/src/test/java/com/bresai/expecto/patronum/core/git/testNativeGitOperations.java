@@ -87,4 +87,33 @@ public class testNativeGitOperations extends AheadBehindTest<NativeGitProvider> 
         localRepositoryGit.commit().setMessage("NacosValueTest").call();
         log.info(nativeGitOperations.diffBranch("dev", "origin/master"));
     }
+
+    @Test
+    public void testGetCommitId() throws Exception {
+        createLocalCommit();
+
+        //create dev branch
+        localRepositoryGit.branchCreate().setName("dev").call();
+        log.info(nativeGitOperations.getCommitId("origin/master"));
+    }
+
+    @Test
+    public void testGetFileFromRemote() throws Exception {
+        createLocalCommit();
+
+        String commitId = nativeGitOperations.getCommitId("origin/master");
+        log.info(commitId);
+        //commit file to master
+        File newFile = localRepository.newFile("NacosValueTest.java");
+
+        InputStream is = this.getClass().getClassLoader().getResourceAsStream("NacosValueTest.java");
+        writeFile(is, newFile);
+        localRepositoryGit.add().addFilepattern(newFile.getName()).call();
+        localRepositoryGit.commit().setMessage("NacosValueTest").call();
+        localRepositoryGit.push().call();
+
+        localRepositoryGit.getRepository().getRemoteNames();
+        String str = nativeGitOperations.getFileFromRemote("origin/master", newFile.getName());
+        log.info(str);
+    }
 }
