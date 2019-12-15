@@ -1,6 +1,6 @@
 package com.bresai.expecto.patronum.core.parser;
 
-import com.bresai.expecto.patronum.core.bean.ConfigBean;
+import com.bresai.expecto.patronum.core.bean.Config;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  * @date:2019/11/27
  * @content:
  */
-public abstract class ValueResolver<T extends ConfigBean> {
+public abstract class ValueResolver<T extends Config> {
 
     private Pattern pattern;
 

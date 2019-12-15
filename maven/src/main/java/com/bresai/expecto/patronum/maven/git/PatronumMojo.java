@@ -17,10 +17,12 @@
 
 package com.bresai.expecto.patronum.maven.git;
 
-import com.bresai.expecto.patronum.core.bean.ConfigBean;
-import com.bresai.expecto.patronum.core.bean.FileBean;
-import com.bresai.expecto.patronum.core.file.JavaWalker;
-import com.bresai.expecto.patronum.core.result.Result;
+import com.bresai.expecto.patronum.core.NacosPatronum;
+import com.bresai.expecto.patronum.core.bean.Config;
+import com.bresai.expecto.patronum.core.printer.FilePrinter;
+import com.bresai.expecto.patronum.core.printer.FileReporter;
+import com.bresai.expecto.patronum.core.printer.TextFormatter;
+import com.bresai.expecto.patronum.core.walker.JavaWalker;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -37,12 +39,8 @@ import pl.project13.maven.log.MavenLoggerBridge;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -131,8 +129,6 @@ public class PatronumMojo extends AbstractMojo {
     @Nonnull
     private final LoggerBridge log = new MavenLoggerBridge(this, false);
 
-    Result<ConfigBean> ret;
-
     @Override
     public void execute() throws MojoExecutionException {
         try {
@@ -153,39 +149,19 @@ public class PatronumMojo extends AbstractMojo {
                 return;
             }
 
+            JavaWalker javaWalker = new JavaWalker(log, dotGitDirectory, projectDirectory);
+            Map<String, List<Config>> ret = javaWalker.walkThrough(projectDirectory);
 
+            NacosPatronum patronum = new NacosPatronum(javaWalker, "origin/master", log, projectDirectory);
 
-            JavaWalker javaWalker = new JavaWalker(log, dotGitDirectory);
-            ret = javaWalker.walkThroughLocal(projectDirectory);
+            List<Config> newConfigList = patronum.getNewConfig();
+            List<Config> removedConfigList = patronum.getRemovedConfig();
 
-            Set<FileBean> set = ret.getFileBeanSet();
+            FilePrinter printer = new FilePrinter("", new TextFormatter(), log);
+            new FileReporter(printer, "")
+                    .report(newConfigList, removedConfigList);
 
-            set.forEach(fileBean -> {
-                List<ConfigBean> beans = javaWalker.getJavaFileParser().parser(fileBean.getFile());
-
-            });
-
-            log.info("result size {}, result list {}", ret.getSize(), ret.getSimpleList());
-
-//            if (generateGitPropertiesFile){
-            Path path = Files.createFile(Paths.get(projectDirectory.getAbsolutePath(), "config.conf"));
-            OutputStream is = Files.newOutputStream(path);
-            ret.getCompleteList().forEach(configBean -> {
-                try {
-                    is.write(configBean.toString().getBytes());
-                    is.write("\n\n".getBytes());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }finally {
-                    try {
-                        is.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-//            }
-        } catch (GitCommitIdExecutionException | IOException e) {
+        } catch (GitCommitIdExecutionException | IllegalAccessException | IOException | InstantiationException e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
     }

@@ -1,7 +1,7 @@
 package com.bresai.expecto.patronum.maven.git;
 
-import com.bresai.expecto.patronum.core.bean.ConfigBean;
-import com.bresai.expecto.patronum.core.result.Result;
+import com.bresai.expecto.patronum.core.bean.Config;
+import com.bresai.expecto.patronum.core.bean.result.Result;
 import junitparams.JUnitParamsRunner;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
@@ -30,7 +30,7 @@ public class testPatronumMojo extends GitIntegrationTest {
         mojo.projectDirectory = file.getParentFile();
         mojo.dotGitDirectory = new File("/Users/bresai/src/aCard/acardBackend/src/main/java/com/acard/backend/service/impl");
         mojo.execute();
-        Result<ConfigBean> ret = mojo.ret;
+        Result<Config> ret = mojo.ret;
 
         System.out.println(ret);
     }

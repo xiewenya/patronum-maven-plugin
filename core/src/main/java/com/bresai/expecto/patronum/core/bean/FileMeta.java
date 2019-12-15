@@ -1,5 +1,6 @@
 package com.bresai.expecto.patronum.core.bean;
 
+import com.bresai.expecto.patronum.core.utils.ProjectFileUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -16,18 +17,14 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class FileBean {
+public class FileMeta {
     private File file;
 
     private String relativePath;
-    private List<ConfigBean> configBeanList;
+    private List<Config> configList;
 
     public String getRelativePath(File projectDir){
-        if (file == null){
-            return "";
-        }
-
-        return projectDir.toURI().relativize(file.toURI()).getPath();
+        return ProjectFileUtils.getRelativePath(projectDir, file);
     }
 
     @Override
@@ -40,10 +37,10 @@ public class FileBean {
             return false;
         }
 
-        FileBean fileBean = (FileBean) o;
+        FileMeta fileMeta = (FileMeta) o;
 
         return new EqualsBuilder()
-                .append(file, fileBean.file)
+                .append(file, fileMeta.file)
                 .isEquals();
     }
 

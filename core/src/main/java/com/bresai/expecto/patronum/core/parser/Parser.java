@@ -1,6 +1,6 @@
 package com.bresai.expecto.patronum.core.parser;
 
-import com.bresai.expecto.patronum.core.bean.ConfigBean;
+import com.bresai.expecto.patronum.core.bean.Config;
 
 import java.io.File;
 import java.util.List;
@@ -12,5 +12,7 @@ import java.util.List;
  * @content:
  */
 public interface Parser {
-    List<ConfigBean> parser(File file);
+    List<Config> parser(File file);
+
+    List<Config> parser(String code);
 }

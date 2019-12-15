@@ -13,12 +13,16 @@ import java.util.Map;
  */
 @Setter
 @Getter
-public class NacosValueBean extends ConfigBean{
+public class NacosValue extends Config {
 
-    private String configName;
-
+    /**
+     * default value of nacos value
+     */
     private String defaultValue;
 
+    /**
+     * values for different env
+     */
     private Map<String, String> envValueMap;
 
     private boolean isAutoRefreshed;
@@ -31,7 +35,7 @@ public class NacosValueBean extends ConfigBean{
             comments.forEach(comment -> builder.append(comment.toString()));
         }
 
-        builder.append(configName).append("(")
+        builder.append(getConfigName()).append("(")
                 .append(defaultValue).append(",")
                 .append(isAutoRefreshed).append(")@")
                 .append(fileMeta.toString());

@@ -1,6 +1,6 @@
 package com.bresai.expecto.patronum.core.parser;
 
-import com.bresai.expecto.patronum.core.bean.NacosValueBean;
+import com.bresai.expecto.patronum.core.bean.NacosValue;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.regex.Pattern;
@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  * @date:2019/11/27
  * @content:
  */
-public class NacosValueResolver extends ValueResolver<NacosValueBean> {
+public class NacosValueResolver extends ValueResolver<NacosValue> {
 
     @Override
     public String[] resolve(String value){

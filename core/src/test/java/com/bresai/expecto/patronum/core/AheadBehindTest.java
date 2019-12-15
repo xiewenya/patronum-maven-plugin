@@ -17,6 +17,7 @@
 
 package com.bresai.expecto.patronum.core;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -35,60 +36,63 @@ import static org.junit.Assert.assertThat;
 
 public abstract class AheadBehindTest<T extends GitProvider> {
 
-  @Rule
-  public TemporaryFolder remoteRepository = new TemporaryFolder();
+    @Rule
+    public TemporaryFolder remoteRepository = new TemporaryFolder();
 
-  @Rule
-  public TemporaryFolder localRepository = new TemporaryFolder();
+    @Rule
+    public TemporaryFolder localRepository = new TemporaryFolder();
 
-  @Rule
-  public TemporaryFolder secondLocalRepository = new TemporaryFolder();
+    @Rule
+    public TemporaryFolder secondLocalRepository = new TemporaryFolder();
 
-  protected Git localRepositoryGit;
+    protected Git localRepositoryGit;
 
-  protected Git secondLocalRepositoryGit;
+    protected Git secondLocalRepositoryGit;
 
-  protected T gitProvider;
+    protected T gitProvider;
 
-  @Before
-  public void setup() throws Exception {
+    @Before
+    public void setup() throws Exception {
 
-    createRemoteRepository();
+        createRemoteRepository();
 
-    setupLocalRepository();
+        setupLocalRepository();
 
-    createAndPushInitialCommit();
+        createAndPushCommit();
 
-    setupSecondLocalRepository();
+        setupSecondLocalRepository();
 
-    gitProvider = gitProvider();
+        gitProvider = gitProvider();
 
-    extraSetup();
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    if (localRepositoryGit != null) {
-      localRepositoryGit.close();
+        extraSetup();
     }
 
-    if (secondLocalRepositoryGit != null) {
-      secondLocalRepositoryGit.close();
-    }
-  }
+    @After
+    public void tearDown() throws Exception {
+        if (localRepositoryGit != null) {
+            localRepositoryGit.close();
+        }
 
-  protected void writeFile(String str, File file){
-    BufferedWriter writer = null;
-    try {
-      writer = new BufferedWriter(new FileWriter(file));
-      writer.write(str);
-    } catch (IOException e) {
-      e.printStackTrace();
+        if (secondLocalRepositoryGit != null) {
+            secondLocalRepositoryGit.close();
+        }
     }
 
-  }
+    protected void writeFile(String str, File file) {
+        writeFile(str, file, false);
+    }
 
-    protected void writeFile(InputStream is, File file){
+    protected void writeFile(String str, File file, boolean append) {
+        try {
+            FileWriter fr = new FileWriter(file, true);
+            fr.write(str);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    protected void writeFile(InputStream is, File file) {
         BufferedWriter writer = null;
         try {
             writer = new BufferedWriter(new FileWriter(file));
@@ -99,92 +103,120 @@ public abstract class AheadBehindTest<T extends GitProvider> {
 
     }
 
-  protected abstract T gitProvider();
+    protected abstract T gitProvider();
 
-  protected void extraSetup() {
-    // Override in subclass to perform extra stuff in setup
-  }
+    protected void extraSetup() {
+        // Override in subclass to perform extra stuff in setup
+    }
 
-  @Test
-  public void shouldNotBeAheadOrBehind() throws Exception {
+    @Test
+    public void shouldNotBeAheadOrBehind() throws Exception {
 
-    AheadBehind aheadBehind = gitProvider.getAheadBehind();
-    assertThat(aheadBehind.ahead(), CoreMatchers.is("0"));
-    assertThat(aheadBehind.behind(), CoreMatchers.is("0"));
-  }
+        AheadBehind aheadBehind = gitProvider.getAheadBehind();
+        assertThat(aheadBehind.ahead(), CoreMatchers.is("0"));
+        assertThat(aheadBehind.behind(), CoreMatchers.is("0"));
+    }
 
-  @Test
-  public void shouldBe1Ahead() throws Exception {
+    @Test
+    public void shouldBe1Ahead() throws Exception {
 
-    createLocalCommit();
+        createLocalCommit();
 
-    AheadBehind aheadBehind = gitProvider.getAheadBehind();
-    assertThat(aheadBehind.ahead(), CoreMatchers.is("1"));
-    assertThat(aheadBehind.behind(), CoreMatchers.is("0"));
-  }
+        AheadBehind aheadBehind = gitProvider.getAheadBehind();
+        assertThat(aheadBehind.ahead(), CoreMatchers.is("1"));
+        assertThat(aheadBehind.behind(), CoreMatchers.is("0"));
+    }
 
-  @Test
-  public void shouldBe1Behind() throws Exception {
+    @Test
+    public void shouldBe1Behind() throws Exception {
 
-    createCommitInSecondRepoAndPush();
+        createCommitInSecondRepoAndPush();
 
-    AheadBehind aheadBehind = gitProvider.getAheadBehind();
-    assertThat(aheadBehind.ahead(), CoreMatchers.is("0"));
-    assertThat(aheadBehind.behind(), CoreMatchers.is("1"));
-  }
+        AheadBehind aheadBehind = gitProvider.getAheadBehind();
+        assertThat(aheadBehind.ahead(), CoreMatchers.is("0"));
+        assertThat(aheadBehind.behind(), CoreMatchers.is("1"));
+    }
 
-  @Test
-  public void shouldBe1AheadAnd1Behind() throws Exception {
+    @Test
+    public void shouldBe1AheadAnd1Behind() throws Exception {
 
-    createLocalCommit();
-    createCommitInSecondRepoAndPush();
+        createLocalCommit();
+        createCommitInSecondRepoAndPush();
 
-    AheadBehind aheadBehind = gitProvider.getAheadBehind();
-    assertThat(aheadBehind.ahead(), CoreMatchers.is("1"));
-    assertThat(aheadBehind.behind(), CoreMatchers.is("1"));
-  }
+        AheadBehind aheadBehind = gitProvider.getAheadBehind();
+        assertThat(aheadBehind.ahead(), CoreMatchers.is("1"));
+        assertThat(aheadBehind.behind(), CoreMatchers.is("1"));
+    }
 
-  protected void createLocalCommit() throws Exception {
-    File newFile = localRepository.newFile();
-    localRepositoryGit.add().addFilepattern(newFile.getName()).call();
-    localRepositoryGit.commit().setMessage("ahead").call();
-  }
+    protected void createLocalCommit() throws Exception {
+        File newFile = localRepository.newFile();
+        localRepositoryGit.add().addFilepattern(newFile.getName()).call();
+        localRepositoryGit.commit().setMessage("ahead").call();
+    }
 
-  protected void createCommitInSecondRepoAndPush() throws Exception {
-    secondLocalRepositoryGit.pull().call();
+    protected void createCommitInSecondRepoAndPush() throws Exception {
+        secondLocalRepositoryGit.pull().call();
 
-    File newFile = secondLocalRepository.newFile();
-    secondLocalRepositoryGit.add().addFilepattern(newFile.getName()).call();
-    secondLocalRepositoryGit.commit().setMessage("behind").call();
+        File newFile = secondLocalRepository.newFile();
+        secondLocalRepositoryGit.add().addFilepattern(newFile.getName()).call();
+        secondLocalRepositoryGit.commit().setMessage("behind").call();
 
-    secondLocalRepositoryGit.push().call();
-  }
+        secondLocalRepositoryGit.push().call();
+    }
 
-  protected void createRemoteRepository() throws Exception {
-    Git.init().setBare(true).setDirectory(remoteRepository.getRoot()).call();
-  }
+    protected void createRemoteRepository() throws Exception {
+        Git.init().setBare(true).setDirectory(remoteRepository.getRoot()).call();
+    }
 
-  protected void setupLocalRepository() throws Exception {
-    localRepositoryGit = Git.cloneRepository().setURI(remoteRepository.getRoot().toURI().toString())
-        .setDirectory(localRepository.getRoot()).setBranch("master").call();
+    protected void setupLocalRepository() throws Exception {
+        localRepositoryGit = Git.cloneRepository().setURI(remoteRepository.getRoot().toURI().toString())
+                .setDirectory(localRepository.getRoot()).setBranch("master").call();
 
-    StoredConfig config = localRepositoryGit.getRepository().getConfig();
-    config.setString(ConfigConstants.CONFIG_BRANCH_SECTION, "master", "remote", "origin");
-    config.setString(ConfigConstants.CONFIG_BRANCH_SECTION, "master", "merge", "refs/heads/master");
-    config.save();
-  }
+        StoredConfig config = localRepositoryGit.getRepository().getConfig();
+        config.setString(ConfigConstants.CONFIG_BRANCH_SECTION, "master", "remote", "origin");
+        config.setString(ConfigConstants.CONFIG_BRANCH_SECTION, "master", "merge", "refs/heads/master");
+        config.save();
+    }
 
-  protected void setupSecondLocalRepository() throws Exception {
-    secondLocalRepositoryGit = Git.cloneRepository().setURI(remoteRepository.getRoot().toURI().toString())
-        .setDirectory(secondLocalRepository.getRoot()).setBranch("master").call();
-  }
+    protected void setupSecondLocalRepository() throws Exception {
+        secondLocalRepositoryGit = Git.cloneRepository().setURI(remoteRepository.getRoot().toURI().toString())
+                .setDirectory(secondLocalRepository.getRoot()).setBranch("master").call();
+    }
 
-  protected void createAndPushInitialCommit() throws Exception {
-    File newFile = localRepository.newFile();
-    localRepositoryGit.add().addFilepattern(newFile.getName()).call();
-    localRepositoryGit.commit().setMessage("initial").call();
+    protected boolean removeAndPushCommit(File file) throws Exception {
+        boolean result = file.delete();
+        localRepositoryGit.rm().addFilepattern(file.getName()).call();
+        localRepositoryGit.commit().setMessage("delete").call();
+        localRepositoryGit.push().call();
+        return result;
+    }
 
-    localRepositoryGit.push().call();
-  }
+    protected void createAndPushCommit() throws Exception {
+        createAndPushCommit(null, null);
+    }
+
+    protected File createAndPushCommit(String fileName) throws Exception {
+        return createAndPushCommit(fileName, null);
+    }
+
+    protected File createAndPushCommit(String fileName, String content) throws Exception {
+        File newFile;
+        if (StringUtils.isEmpty(fileName)) {
+            newFile = localRepository.newFile();
+        } else {
+            newFile = localRepository.newFile(fileName);
+        }
+
+        if (StringUtils.isNotEmpty(content)) {
+            writeFile(content, newFile);
+        }
+
+        localRepositoryGit.add().addFilepattern(newFile.getName()).call();
+        localRepositoryGit.commit().setMessage("initial").call();
+
+        localRepositoryGit.push().call();
+
+        return newFile;
+    }
 
 }

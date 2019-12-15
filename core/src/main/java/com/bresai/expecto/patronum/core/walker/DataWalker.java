@@ -1,7 +1,12 @@
-package com.bresai.expecto.patronum.core.file;
+package com.bresai.expecto.patronum.core.walker;
+
+import com.bresai.expecto.patronum.core.bean.Config;
+import com.bresai.expecto.patronum.core.bean.result.FileDiff;
+import com.bresai.expecto.patronum.core.enums.FileDiffEnum;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 /**
@@ -11,6 +16,8 @@ import java.util.function.Predicate;
  * @content:
  */
 public interface DataWalker {
+    Map<FileDiffEnum, List<FileDiff>> searchGitFileDiff(String result);
+
     List<File> search(File dir, Predicate<File> predicate);
 
     Predicate<File> excludeFiles(List<String> excludeFileNames);
@@ -22,4 +29,6 @@ public interface DataWalker {
     Predicate<File> searchJavaFiles();
 
     Predicate<File> searchXmlFiles();
+
+    List<Config> parseFromRemoteFile(String targetRemoteBranch, String filepath);
 }

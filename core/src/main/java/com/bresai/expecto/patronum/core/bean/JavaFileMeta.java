@@ -14,7 +14,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  */
 @Setter
 @Getter
-public class JavaFileBean extends FileBean {
+public class JavaFileMeta extends FileMeta {
 
     private String packageName;
 
@@ -42,7 +42,7 @@ public class JavaFileBean extends FileBean {
             return false;
         }
 
-        JavaFileBean that = (JavaFileBean) o;
+        JavaFileMeta that = (JavaFileMeta) o;
 
         return new EqualsBuilder()
                 .append(packageName, that.packageName)

@@ -1,10 +1,10 @@
 package com.bresai.expecto.patronum.core.git;
 
 import com.bresai.expecto.patronum.core.AheadBehindTest;
+import com.bresai.expecto.patronum.core.StdOutLoggerBridge;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import pl.project13.core.NativeGitProvider;
-import pl.project13.core.log.StdOutLoggerBridge;
 
 import java.io.File;
 import java.io.InputStream;
@@ -16,11 +16,11 @@ import java.io.InputStream;
  * @content:
  */
 @Slf4j
-public class testNativeGitOperations extends AheadBehindTest<NativeGitProvider> {
+public class testNativeGitOperator extends AheadBehindTest<NativeGitProvider> {
 
-    private NativeGitOperations nativeGitOperations;
+    private NativeGitOperator nativeGitOperator;
 
-    private StdOutLoggerBridge loggerBridge;
+    private StdOutLoggerBridge loggerBridge = new StdOutLoggerBridge(false);
 
     @Override
     protected NativeGitProvider gitProvider() {
@@ -29,7 +29,7 @@ public class testNativeGitOperations extends AheadBehindTest<NativeGitProvider> 
 
     @Override
     protected void extraSetup() {
-        nativeGitOperations = new NativeGitOperations(NativeGitRunner.of(localRepository.getRoot(), 1000L, loggerBridge));
+        nativeGitOperator = new NativeGitOperator(NativeGitRunner.of(localRepository.getRoot(), 1000L, loggerBridge));
         gitProvider.setEvaluateOnCommit("HEAD");
     }
 
@@ -42,11 +42,12 @@ public class testNativeGitOperations extends AheadBehindTest<NativeGitProvider> 
         log.info(gitProvider.getBranchName());
         log.info(gitProvider.getCommitId());
 
-        log.info(nativeGitOperations.switchBranch("dev"));
+        log.info(nativeGitOperator.switchBranch("dev"));
 
         log.info(gitProvider.getBranchName());
         log.info(gitProvider.getCommitId());
     }
+
 
     @Test
     public void testDiffBranchNoDiff() throws Exception {
@@ -56,11 +57,11 @@ public class testNativeGitOperations extends AheadBehindTest<NativeGitProvider> 
         log.info(gitProvider.getBranchName());
         log.info(gitProvider.getCommitId());
 
-        log.info(nativeGitOperations.switchBranch("dev"));
+        log.info(nativeGitOperator.switchBranch("dev"));
         log.info(gitProvider.getBranchName());
         log.info(gitProvider.getCommitId());
 
-        log.info(nativeGitOperations.diffBranch("master", "dev"));
+        log.info(nativeGitOperator.diffBranch("master", "dev"));
     }
 
 
@@ -75,7 +76,7 @@ public class testNativeGitOperations extends AheadBehindTest<NativeGitProvider> 
         log.info(gitProvider.getCommitId());
 
         //switch to dev branch
-        log.info(nativeGitOperations.switchBranch("dev"));
+        log.info(nativeGitOperator.switchBranch("dev"));
         log.info(gitProvider.getBranchName());
         log.info(gitProvider.getCommitId());
 
@@ -85,7 +86,34 @@ public class testNativeGitOperations extends AheadBehindTest<NativeGitProvider> 
         writeFile(is, newFile);
         localRepositoryGit.add().addFilepattern(newFile.getName()).call();
         localRepositoryGit.commit().setMessage("NacosValueTest").call();
-        log.info(nativeGitOperations.diffBranch("dev", "origin/master"));
+        log.info(nativeGitOperator.diffBranch("dev", "origin/master"));
+    }
+
+    @Test
+    public void testDiffBranchFileNameList() throws Exception {
+        nativeGitOperator.switchBranch("master");
+
+        File fileToDelete = createAndPushCommit("fileToDelete.java");
+        File fileToModify = createAndPushCommit("fileToModify.java");
+
+        //create dev branch
+        localRepositoryGit.branchCreate().setName("dev").call();
+        nativeGitOperator.switchBranch("dev");
+
+        removeAndPushCommit(fileToDelete);
+
+        localRepositoryGit.add().addFilepattern(fileToModify.getName()).call();
+        writeFile("fileToModify and fileToModify", fileToModify, true);
+        localRepositoryGit.commit().setMessage("modify").call();
+        localRepositoryGit.push().call();
+        log.info(nativeGitOperator.diffBranchNameStatus("dev", "origin/master"));
+
+        createAndPushCommit("fileToAdd.java", "fileToAdd");
+        createAndPushCommit("fileToAdd2.java", "fileToAdd2");
+
+        log.info(nativeGitOperator.diffBranchNameStatus("dev", "origin/master"));
+
+
     }
 
     @Test
@@ -94,14 +122,14 @@ public class testNativeGitOperations extends AheadBehindTest<NativeGitProvider> 
 
         //create dev branch
         localRepositoryGit.branchCreate().setName("dev").call();
-        log.info(nativeGitOperations.getCommitId("origin/master"));
+        log.info(nativeGitOperator.getCommitId("origin/master"));
     }
 
     @Test
     public void testGetFileFromRemote() throws Exception {
         createLocalCommit();
 
-        String commitId = nativeGitOperations.getCommitId("origin/master");
+        String commitId = nativeGitOperator.getCommitId("origin/master");
         log.info(commitId);
         //commit file to master
         File newFile = localRepository.newFile("NacosValueTest.java");
@@ -113,7 +141,7 @@ public class testNativeGitOperations extends AheadBehindTest<NativeGitProvider> 
         localRepositoryGit.push().call();
 
         localRepositoryGit.getRepository().getRemoteNames();
-        String str = nativeGitOperations.getFileFromRemote("origin/master", newFile.getName());
+        String str = nativeGitOperator.getFileFromRemote("origin/master", newFile.getName());
         log.info(str);
     }
 }

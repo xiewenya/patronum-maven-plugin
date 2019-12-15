@@ -1,8 +1,8 @@
 package com.bresai.expecto.patronum.core.parser;
 
-import com.bresai.expecto.patronum.core.bean.ConfigBean;
-import com.bresai.expecto.patronum.core.bean.JavaFileBean;
-import com.bresai.expecto.patronum.core.bean.NacosValueBean;
+import com.bresai.expecto.patronum.core.bean.Config;
+import com.bresai.expecto.patronum.core.bean.JavaFileMeta;
+import com.bresai.expecto.patronum.core.bean.NacosValue;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
@@ -35,12 +35,12 @@ public class JavaFileParser extends JavaParser {
     }
 
     @Override
-    public List<ConfigBean> parser(String code) {
+    public List<Config> parser(String code) {
         return parse(StaticJavaParser.parse(code), null);
     }
 
     @Override
-    public List<ConfigBean> parser(File file) {
+    public List<Config> parser(File file) {
         try {
             log.info(file.getAbsolutePath());
             return parse(StaticJavaParser.parse(file), file);
@@ -50,10 +50,10 @@ public class JavaFileParser extends JavaParser {
         }
     }
 
-    private List<ConfigBean> parse(CompilationUnit cu, File file) {
+    private List<Config> parse(CompilationUnit cu, File file) {
         NodeList<BodyDeclaration<?>> nodeList = new NodeList<>();
 
-        JavaFileBean fileBean = new JavaFileBean();
+        JavaFileMeta fileBean = new JavaFileMeta();
         fileBean.setPackageName(cu);
         fileBean.setClassName(cu);
         fileBean.setFile(file);
@@ -64,15 +64,15 @@ public class JavaFileParser extends JavaParser {
 
         List<AnnotationExpr> annotations = findAnnotations(nodeList, "NacosValue");
 
-        List<ConfigBean> configBeans = buildAnnotationBeans(annotations, fileBean);
+        List<Config> configs = buildAnnotationBeans(annotations, fileBean);
 
-        fileBean.setConfigBeanList(configBeans);
+        fileBean.setConfigList(configs);
 
-        return configBeans;
+        return configs;
     }
 
-    private List<ConfigBean> buildAnnotationBeans(List<AnnotationExpr> annotations, JavaFileBean fileBean) {
-        List<ConfigBean> beans = new LinkedList<>();
+    private List<Config> buildAnnotationBeans(List<AnnotationExpr> annotations, JavaFileMeta fileBean) {
+        List<Config> beans = new LinkedList<>();
         //build NacosValueBean for each nacosValue annotation
         annotations.forEach(annotation -> {
             beans.add(parseNacosValueProperties(annotation, fileBean));
@@ -93,8 +93,8 @@ public class JavaFileParser extends JavaParser {
         return annotations;
     }
 
-    private NacosValueBean parseNacosValueProperties(AnnotationExpr annotation, JavaFileBean fileBean) {
-        NacosValueBean bean = new NacosValueBean();
+    private NacosValue parseNacosValueProperties(AnnotationExpr annotation, JavaFileMeta fileBean) {
+        NacosValue bean = new NacosValue();
 
         if (annotation.isNormalAnnotationExpr()) {
             NodeList<MemberValuePair> valuePairs = annotation.asNormalAnnotationExpr().getPairs();
@@ -121,7 +121,7 @@ public class JavaFileParser extends JavaParser {
         return bean;
     }
 
-    private void parseComments(AnnotationExpr annotation, NacosValueBean bean) {
+    private void parseComments(AnnotationExpr annotation, NacosValue bean) {
         annotation.getParentNode().ifPresent(node -> {
             List<Comment> comments = new LinkedList<>();
             node.getComment().ifPresent(comments::add);
@@ -130,7 +130,7 @@ public class JavaFileParser extends JavaParser {
         });
     }
 
-    private void getValues(NacosValueBean bean, String expr) {
+    private void getValues(NacosValue bean, String expr) {
         String[] rs = valueResolver.resolve(expr);
 
         if (rs.length == 1) {

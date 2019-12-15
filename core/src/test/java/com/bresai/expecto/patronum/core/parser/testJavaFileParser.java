@@ -1,6 +1,6 @@
 package com.bresai.expecto.patronum.core.parser;
 
-import com.bresai.expecto.patronum.core.bean.ConfigBean;
+import com.bresai.expecto.patronum.core.bean.Config;
 import org.junit.Assert;
 import org.junit.Test;
 import pl.project13.core.log.StdOutLoggerBridge;
@@ -21,7 +21,7 @@ public class testJavaFileParser {
     public void testJavaFileParser(){
         JavaFileParser javaFileParser = new JavaFileParser(new StdOutLoggerBridge(true), new NacosValueResolver());
         URL url = this.getClass().getClassLoader().getResource("NacosValueTest.java");
-        List<ConfigBean> beans = javaFileParser.parser(new File(url.getFile()));
+        List<Config> beans = javaFileParser.parser(new File(url.getFile()));
         Assert.assertEquals(beans.size(), 9);
 
         url = this.getClass().getClassLoader().getResource("NacosValueTestEmpty.java");

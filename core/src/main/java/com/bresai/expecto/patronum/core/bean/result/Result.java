@@ -1,7 +1,7 @@
-package com.bresai.expecto.patronum.core.result;
+package com.bresai.expecto.patronum.core.bean.result;
 
-import com.bresai.expecto.patronum.core.bean.ConfigBean;
-import com.bresai.expecto.patronum.core.bean.FileBean;
+import com.bresai.expecto.patronum.core.bean.Config;
+import com.bresai.expecto.patronum.core.bean.FileMeta;
 import lombok.Data;
 
 import java.util.HashSet;
@@ -16,7 +16,7 @@ import java.util.Set;
  * @content:
  */
 @Data
-public class Result<T extends ConfigBean> {
+public class Result<T extends Config> {
 
     private int size;
 
@@ -24,7 +24,7 @@ public class Result<T extends ConfigBean> {
 
     private List<T> completeList;
 
-    private Set<FileBean> fileBeanSet;
+    private Set<FileMeta> fileMetaSet;
 
     public Result(List<T> completeList) {
         this.completeList = completeList;
@@ -39,10 +39,10 @@ public class Result<T extends ConfigBean> {
     }
 
     private void setFileSet(List<T> completeList) {
-        if (fileBeanSet == null){
-            fileBeanSet = new HashSet<>();
+        if (fileMetaSet == null){
+            fileMetaSet = new HashSet<>();
         }
 
-        completeList.forEach(bean -> fileBeanSet.add(bean.getFileMeta()));
+        completeList.forEach(bean -> fileMetaSet.add(bean.getFileMeta()));
     }
 }
